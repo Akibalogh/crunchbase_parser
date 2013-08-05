@@ -7,7 +7,7 @@ Use
 =
 <ol>
 <li>Install Python 2.X
-<li>Download the parser into a folder of your choosing
+<li>Clone the parser into a folder of your choosing
 <li>Create a text file called "api_key.txt" and put in your Crunchbase API string
 <li>In the script, in search_phrase, enter a keyword that you'd like to search on. The value "analytics" is provided as the default. If no phrases are provided, the parser will download all companies
 <li>Run the script
