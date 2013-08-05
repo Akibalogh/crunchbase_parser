@@ -1,4 +1,3 @@
-import urllib
 import simplejson as json
 from pprint import pprint
 import re
@@ -43,11 +42,11 @@ def search_with_query(api_key, query, results, start, **kwargs):
 	        'api_key': api_key
 	})
 
-	url = SEARCH_BASE + urllib.urlencode(kwargs)
+	url = SEARCH_BASE
 	# print url
 
 	try:
-	        result = json.load(urllib.urlopen(url))
+	        result = json.load(requests.get(url, params=kwargs).content)
 	except ValueError:
                 # Skip any pages where the HTML generates error
 	        print "ValueError in search"
@@ -98,8 +97,8 @@ def retrieve(api_key, company, **kwargs):
         url = RETRIEVE_BASE + company + ".js?" + "api_key=" + api_key
 
         try:
-                returnObject = urllib.urlopen(url)
-                result = json.load(returnObject)
+                returnObject = requests.get(url)
+                result = json.load(returnObject.content)
         except ValueError:
                 # Skip any retreivals
                 print "ValueError in retrieval"
