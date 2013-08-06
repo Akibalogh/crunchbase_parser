@@ -98,7 +98,7 @@ def retrieve(api_key, company, **kwargs):
 
         try:
                 returnObject = requests.get(url)
-                result = json.load(returnObject.content)
+                result = returnObject.json()
         except ValueError:
                 # Skip any retreivals
                 print "ValueError in retrieval"
@@ -239,30 +239,45 @@ for page in permalinks:
                                 enc = l[k].encode('ascii', 'ignore')
                         descriptions = enc
 
-                if (k=="funding_rounds" and str(l[k]) == "[]"):
-                        funded_amount = ""
-                        funded_last_date = ""
+                #if (k=="funding_rounds" and str(l[k]) == "[]"):
+                #        funded_amount = ""
+                #        funded_last_date = ""
 
-                if (k=="funding_rounds" and str(l[k]) != "[]"):
+                if (k=="funding_rounds"):
+			if (l[k] is None):
+				funded_amount = 0	
+				funded_last_date = ""
+				continue
+
                         totalFunded = 0
 
-                        # process list object
-                        r = re.findall("u'raised_amount': (.*?),", str(l[k]))
-                        fy = re.findall("u'funded_year': (.*?),", str(l[k]))
-                        fm = re.findall("u'funded_month': (.*?),", str(l[k]))
-                        fd = re.findall("u'funded_day': (.*?),", str(l[k]))
+			fraised = []
+			fy = []
+			fm = []
+			fd = []
 
-                        for g in r:
-                                if (g != 'None'):
-                                        totalFunded += float(g)
+                        # process list object
+			for rnd in l[k]:
+				amt = rnd['raised_amount']
+				if (amt is not None and amt != ''):
+					fraised.append(amt)
+					totalFunded += float(amt)
+				fy.append(rnd['funded_year'])
+				fm.append(rnd['funded_month'])
+				fd.append(rnd['funded_day'])
+
+                        #r = re.findall("u'raised_amount': (.*?),", str(l[k]))
+                        #fy = re.findall("u'funded_year': (.*?),", str(l[k]))
+                        #fm = re.findall("u'funded_month': (.*?),", str(l[k]))
+                        #fd = re.findall("u'funded_day': (.*?),", str(l[k]))
 
                         latestDate = datetime(1,1,1)
 
                         for a in range(len(fy)):
-                                if (fd[a] == "None"):
+                                if (fd[a] is None):
                                         fd[a] = 1
 
-                                if (fy[a] != "None" and fm[a] != "None"):
+                                if (fy[a] is not None and fm[a] is not None):
                                         currentDate = datetime(int(fy[a]), int(fm[a]), int(fd[a]))
                                         if (latestDate < currentDate) or (latestDate==datetime(1,1,1)):
                                                 latestDate = currentDate
@@ -279,30 +294,42 @@ for page in permalinks:
 
 
                 if (k=="acquisition"):
-                        aa = re.search("u'price_amount': (.*?),", str(l[k]))
-                        ay = re.findall("u'acquired_year': (.*?).$", str(l[k]))
-                        am = re.findall("u'acquired_month': (.*?),", str(l[k]))
-                        ad = re.findall("u'acquired_day': (.*?),", str(l[k]))
+                        if (l[k] is None):
+                                acquired_amount = ""
+				acquired_date = ""
+                      		continue 
+			
+			aa = []
+			ay = []
+			am = []
+			ad = []
+
+			# Assumes one acquisition per company
+			aa.append(l[k]['price_amount'])
+			ay.append(l[k]['acquired_year'])
+			am.append(l[k]['acquired_month'])
+			ad.append(l[k]['acquired_day'])	
+
+                        #aa = re.search("u'price_amount': (.*?),", str(l[k]))
+                        #ay = re.findall("u'acquired_year': (.*?).$", str(l[k]))
+                        #am = re.findall("u'acquired_month': (.*?),", str(l[k]))
+                        #ad = re.findall("u'acquired_day': (.*?),", str(l[k]))
 
                         latestDate = datetime(1,1,1)
 
                         for a in range(len(ay)):
-                                if (ad[a] == "None"):
+                                if (ad[a] is None):
                                         ad[a] = 1
 
-                                if (ay[a] != "None" and am[a] != "None"):
+                                if (ay[a] is not None and am[a] is not None):
                                         currentDate = datetime(int(ay[a]), int(am[a]), int(ad[a]))
                                         if (latestDate < currentDate) or (latestDate==datetime(1,1,1)):
                                                 latestDate = currentDate
-
-                        if (l[k] is None):
-                                acquired_amount = ""
+ 
+			if (aa is None or aa[0] == ""):
+                                acquired_amount = "Price Not Known" # Acquired but price unknown
                         else:
-                                if (aa is None or aa.group(1) == "None"):
-                                        acquired_amount = "Price Not Known" # Acquired but price unknown
-                                else:
-                                        acquired_amount = aa.group(1)
-
+                                acquired_amount = aa[0]
 
                         if latestDate != datetime(1,1,1):
                                 acquired_date = latestDate.strftime("%m-%d-%y")
@@ -328,7 +355,7 @@ for page in permalinks:
 
 		insert_id = cbase.insert(cbase_entry)
 		#print "inserted: ", page
-
+		#print "funding: ", funded_amount, " | acquired: ", acquired_amount
 
 #print "Ready to write"
 #print "Name " + str(len(names))
