@@ -162,6 +162,10 @@ for page in permalinks:
                         phone_numbers = l[k]
 
                 if (k=="offices"):
+			if (l[k] is None or str(l[k]) == "[]"):
+				states = ""
+				countries = ""			
+				continue
 
 			off = []
 			st = []
@@ -244,7 +248,7 @@ for page in permalinks:
                 #        funded_last_date = ""
 
                 if (k=="funding_rounds"):
-			if (l[k] is None):
+			if (l[k] is None or str(l[k]) == "[]"):
 				funded_amount = 0	
 				funded_last_date = ""
 				continue
@@ -294,7 +298,7 @@ for page in permalinks:
 
 
                 if (k=="acquisition"):
-                        if (l[k] is None):
+                        if (l[k] is None or str(l[k]) == "[]"):
                                 acquired_amount = ""
 				acquired_date = ""
                       		continue 
