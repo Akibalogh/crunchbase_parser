@@ -110,6 +110,7 @@ def retrieve(api_key, company, **kwargs):
         return result
 
 permalinks = search(MasheryKey, search_phrase, 10, 1)
+print "Ready to process: " , len(permalinks), " entries"
 
 # Uncomment for testing purposes
 #permalinks = []
@@ -130,20 +131,6 @@ for page in permalinks:
 
                 if (k=="error"):
                         print "ERROR at " + l[k]
-                        """
-                        names.append("")
-                        homepages.append("")
-                        founded_years.append("")
-                        phone_numbers.append("")
-                        states.append("")
-                        countries.append("")
-                        descriptions.append("")
-                        funded_amount.append("")
-                        employees.append("")
-                        acquired_amount.append("")
-                        funded_last_date.append("")
-                        acquired_date.append("")
-                        """
 
                 if (k=="name"):
                         enc = ""
@@ -160,6 +147,9 @@ for page in permalinks:
 
                 if (k=="phone_number"):
                         phone_numbers = l[k]
+
+                if (k=="email_address"):
+                        email_address = l[k]
 
                 if (k=="offices"):
 			if (l[k] is None or str(l[k]) == "[]"):
@@ -249,7 +239,7 @@ for page in permalinks:
 
                 if (k=="funding_rounds"):
 			if (l[k] is None or str(l[k]) == "[]"):
-				funded_amount = 0	
+				funded_amount = ""	
 				funded_last_date = ""
 				continue
 
@@ -294,7 +284,10 @@ for page in permalinks:
                         else:
                                 funded_last_date = ""
 
-                        funded_amount = totalFunded
+			if (totalFunded != 0):
+	                        funded_amount = totalFunded
+			else:
+				funded_amount = ""
 
 
                 if (k=="acquisition"):
@@ -343,18 +336,19 @@ for page in permalinks:
 	if (cbase.find( {"permalink": page} ).count() == 0):
 		cbase_entry = [{
 			"permalink": page,
-			"names": names,
-			"homepages": homepages,
-			"founded_years": founded_years,
-			"phone_numbers": phone_numbers,
+			"company_name": names,
+			"homepage": homepages,
+			"founding_year": founded_years,
+			"email_address": email_address,
+			"phone_number": phone_numbers,
 			"states": states,
 			"countries": countries,
-			"descriptions": descriptions,
+			"description": descriptions,
 			"employees": employees,
 			"acquired_amount": acquired_amount,
+			"aqcuired_date": acquired_date,
 			"funded_amount": funded_amount,
 			"funded_last_date": funded_last_date,
-			"aqcuired_date": acquired_date
 		}]
 
 		insert_id = cbase.insert(cbase_entry)
@@ -362,7 +356,7 @@ for page in permalinks:
 		#print "funding: ", funded_amount, " | acquired: ", acquired_amount
 
 #print "Ready to write"
-#print "Name " + str(len(names))
+#print "Company Name " + str(len(names))
 #print "Homep " + str(len(homepages))
 #print "Founded " + str(len(founded_years))
 #print "Emply " + str(len(employees))
