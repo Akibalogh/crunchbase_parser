@@ -1,7 +1,7 @@
 crunchbase_parser
 =================
 
-This parser queries the Crunchbase API and downloads information about startups and their funding into a CSV
+This parser queries the Crunchbase API and downloads information about startups and their funding.
 
 Use
 =
