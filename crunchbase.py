@@ -1,4 +1,5 @@
-import simplejson as json
+import json
+#import simplejson as json
 from pprint import pprint
 import re
 import math
@@ -52,12 +53,20 @@ def search_with_query(api_key, query, results, start, **kwargs):
 	url = SEARCH_BASE
 	# print url
 
+	result = ""
 	try:
-	        result = json.load(requests.get(url, params=kwargs).content)
+		request = requests.get(url, params=kwargs)
+	        result = request.json()
 	except ValueError:
                 # Skip any pages where the HTML generates error
 	        print "ValueError in search"
 	        return dict('')
+	except AttributeError:
+		print "AttributeError. request code =", result
+		return dict('')
+
+	if request.status_code != 200:
+		raise Exception('Request status code is not 200')
 
 	return result
 
@@ -221,7 +230,7 @@ for page in permalinks:
                                 # Print any offices that may potentially be HQs, where we know the state
 				for item in l[k]:
 					if (item['description'] is not None and item['description'] <> "" and item['state_code'] is not None):
-		                                print item['description'].encode('ascii', 'ignore'), " for ", page
+		                                print item['description'].encode('ascii', 'ignore'), " might be HQ for ", page
 
                         if (foundHQ == 0):
                                 # No HQ found
@@ -232,7 +241,6 @@ for page in permalinks:
                         employees = l[k]
 
                 if (k=="description"):
-
                         enc = ""
 
                         if (l[k] is not None):
