@@ -1,0 +1,1 @@
+nohup python ./crunchbase.py 2> nohup.err && echo 'parsing done!' | mail akibalogh@gmail.com &

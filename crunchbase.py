@@ -11,7 +11,8 @@ from pymongo import MongoClient
 # Set a search phrase
 # If empty, the tool will download all companies
 #search_phrase = "'big data'"
-search_phrase = ""
+search_phrase = 'search engine marketing seo sem'
+#search_phrase = ""
 
 # Set other settings
 fundedDateLimit = timedelta(days=365) # i.e. within 1 year
@@ -29,6 +30,12 @@ cbase = MongoClient().cbase.crunchbase_db
 f = open(keyfile)
 MasheryKey = f.read().lstrip().rstrip()
 f.close()
+
+# Pull the HQ types from a file
+HQ_types = []
+file_hq_types = open('HQ_types.txt', 'r+')
+for line in file_hq_types.readlines():
+	HQ_types.append(line.rstrip().lstrip())
 
 # Initialize values
 total = 0
@@ -170,7 +177,11 @@ for page in permalinks:
                         #st = re.findall("u'state_code': u'(.*?)',", str(l[k]))
                         #country = re.findall("u'country_code': u'(.*?)',", str(l[k]))
 
-                        HQ_types = ['HQ', "dynaTrace HQ", "Zorch Headquarters", "Sales / Marketing Office", "Baltimore (Headquarters)", "New York Headquarters", "NA Headquarters", "Headquaters", "US Head office", "US Corporate HQ", "American Headquarters", "NYC HQ", "N America Headquarters", "World/US Headquarters", 'Admeld NYC (HQ)', 'Headquarters (US)', 'HQ USA', 'H-FARM USA', 'StepOut HQ', 'HQ / USA', 'Seattle East (HQ)', 'HQ Los Angeles', 'MyBuys HQ', 'Google Headquarters', 'Global HQ', 'Corporate Headquarters', "Main Office", "California Office", "InFact Group GmbH", "Seattle", "Auronix - Sillicon Valley", "Registered office", "Sewri Office", "Portland Office", "iWatchLife", "Houston", "101 W. Kirkwood Ave.", "Technical", "Boston Office", "Atlanta Office", "Main Office ", "Sales Office", "San Francisco Office", "Toronto Office", "NYC Office", "Kronos headquarters", "Business Development", "Recognia Inc.", "San Francisco", "Los Angeles Office", "World HQ", "Webvisionz", "OFFSITENOC Services", "USA HQ", "PERONii Solutions", "World Headquarter", "Corporate Headquarters:", "Corporate headquarters:", "San Jose Headquarters", "NewQuest - Paris", "San Francisco", "Main Office", "US Sales Office", "U.S. Headquarters", "3scale USA", "North American HQ", "Corporate Office 4CS ", "Operations HQ", "London, UK", "Interactive Buzz, LLC.", "ISACGlobal, US", "Office", "TimeWave Media Vermont", "European HQ", "US Office", "ClickFuel", "USA Head office", "London Office", "SiteWit Headquarter", "Head office", "Direct Partners", "Jivox US Headquarters", "Offices", "iKen Solutions - India", "Kronos headquarters", "WORLDWIDE HEADQUARTERS", "Corporate Office 4CS", "Grupa Nokaut HQ", "Miami Headquarter", "Worldwide Headquarters", "Boston HQ Office", "Terapeak HQ", "European Headquarters", "Next Big Sound HQ", "Paris HQ Office", "IIH Nordic Headquarters", "Suzerein Solutions HQ", "Argyle HQ", "Amsterdam HQ", "Birst Headquarters", "Sales Headquarters", "San Francisco HQ", "Asia-Pacific HQ", "Raleigh-Durham HQ", "UserReport.com, Inc. (HQ)", "Crowdbooster HQ", "Global Headquarters", "TOA Technologies - US ", "EzineArticles.com HQ", "Paris HQ", "ReachForce HQ", "Main Headquarters", "US Headquarters", "North America HQ", "USA Headquarters", "Home Office", "French Headquarters", "Sweden (HQ)", "Tampa HQ", "Board HQ", "Australian HQ", "Xpandion HQ", "London HQ", "Global HQ", "Social Apps HQ", "Richmond (HQ)", "US HQ", "Company Headquarters", "USA Marketing Unit", "US Address", "Main office", "Palo Alto HQ", "Corporate Office", u"HQ", u'Head Office', u'Headquarters', u'Headquarter', 'New York Office', u'Head Office', u'Flurry San Francisco', u'Corporate Headquarters', 'Corporate HQ', u'CORPORATE OFFICE', u'World Headquarters', 'Headquarters', 'Operations Office', 'USA - San Francisco - HQ', 'USA Headquarters- NYC', 'BTBM HQ', 'SF HQ', 'Administrative HQ', 'InfoReach Inc. (HQ)']
+		
+			file_hq_types = open('HQ_types.txt', 'r+')
+			for line in file_hq_types.readlines():
+				print line.rstrip().lstrip()
+
 
                         numberOfOffices = len(l[k])
 
@@ -335,6 +346,7 @@ for page in permalinks:
 
 	if (cbase.find( {"permalink": page} ).count() == 0):
 		cbase_entry = [{
+			"search_phrase": search_phrase,
 			"permalink": page,
 			"company_name": names,
 			"homepage": homepages,
@@ -355,93 +367,6 @@ for page in permalinks:
 		#print "inserted: ", page
 		#print "funding: ", funded_amount, " | acquired: ", acquired_amount
 
-#print "Ready to write"
-#print "Company Name " + str(len(names))
-#print "Homep " + str(len(homepages))
-#print "Founded " + str(len(founded_years))
-#print "Emply " + str(len(employees))
-#print "Phone " + str(len(phone_numbers))
-#print "State " + str(len(states))
-#print "Country " + str(len(countries))
-#print "Descr " + str(len(descriptions))
-#print "Funded " + str(len(funded_amount))
-#print "Last Funding Date " + str(len(funded_last_date))
-#print "Acquired For " + str(len(acquired_amount))
-#print "Acquired Date " + str(len(acquired_date))
 
-
-#beforeFilter = zip(names, homepages, founded_years, employees, phone_numbers, states, countries, descriptions, funded_amount, funded_last_date, acquired_amount, acquired_date)
-
-
-#finalResults = beforeFilter # Filter disabled for now
-
-"""
-
-##### FILTERS
-
-# Filter by number of employees
-# Filter by time range
-finalResults = []
-numberOfCompanies = len(beforeFilter)
-
-for item in range(numberOfCompanies):
-        c = beforeFilter.pop(0)
-        employeeFilter = 0
-        fundedDateFilter = 0
-        acquiredDateFilter = 0
-
-        # Pull out digits from str
-        # numEmp = re.search("(\d*)", str(c[3]))
-
-        # Only include companies where # of employees is > 20 or None
-        if (c[3] > 20) or (c[3] is None):
-                employeeFilter = 1
-
-        fundingDate = datetime(1,1,1)
-
-        if (c[7] != ""):
-                fundingDate = datetime.strptime(c[7], "%m-%d-%y")
-
-        # Company was funded in last 6 months
-        if (fundingDate == datetime(1,1,1)) or (fundingDate > (datetime.today() - fundedDateLimit)):
-                fundedTimeFilter = 1
-
-        acquiredDate = datetime(1,1,1)
-
-        # Company was acquired over a year ago
-        if (c[9] != "" and c[9] != "Price Not Known"):
-                acquiredDate = datetime.strptime(c[9], "%m-%d-%y")
-
-        if (acquiredDate == datetime(1,1,1)) or (acquiredDate < (datetime.today() - acquiredDateLimit)):
-                acquiredTimeFilter = 1
-
-
-        if employeeFilter == 1 and (fundedDateFilter == 1 or acquiredTimeFilter == 1):
-                finalResults.append(c)
-
-"""
-
-
-
-
-# Insert headers
-#finalResults.insert(0,("Name", "Homepage", "Founded", "Employees", "Phone", "HQ State", "HQ Country", "Description", "Total VC Funding", "Last Funding Date", "Acquired For", "Acquired On"))
-
-
-#w = open(outfile, 'wb')
-#writer = csv.writer(w)
-
-#for r in finalResults:
-#        try:
-#                writer.writerow(r)
-#        except UnicodeEncodeError:
-#                print "UnicodeEncodeError"
-#                writer.writerow("")
-
-#        w.flush
-#w.close
-
-#print "All set. " + str(len(finalResults) - 1) + " record(s) processed.\n"
-#print
-#print "Written to " + outfile
-i = raw_input('Press any key to close\n')
+print "Download complete"
+#i = raw_input('Press any key to close\n')
