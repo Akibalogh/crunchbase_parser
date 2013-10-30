@@ -178,11 +178,6 @@ for page in permalinks:
                         #country = re.findall("u'country_code': u'(.*?)',", str(l[k]))
 
 		
-			file_hq_types = open('HQ_types.txt', 'r+')
-			for line in file_hq_types.readlines():
-				print line.rstrip().lstrip()
-
-
                         numberOfOffices = len(l[k])
 
                         if numberOfOffices == 0:
