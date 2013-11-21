@@ -1,0 +1,14 @@
+db.crunchbase_db.find({states: { $ne: "" }}).count() / db.crunchbase_db.count()
+
+db.crunchbase_db.find({states: "MA"}).count()
+
+db.crunchbase_db.find({states: "MA", funded_amount: {$ne: ""}}).count()
+
+db.crunchbase_db.find({states: "MA", funded_amount: {$ne: 0}}).count()
+
+db.crunchbase_db.find({ $and: [ {states: "MA"}, {funded_amount: {$ne: ""}}, {funded_amount: {$ne: "0"}} ] }).count()
+
+
+mongoexport -d cbase -c crunchbase_db --fieldFile fieldfilespec --csv -o cbaseexport.csv 2> mongoexport.err
+
+e2rtjgdttx96q475va6xn9je
